@@ -1,10 +1,10 @@
 package lesson04;
 
-import lesson04.Interface.Index;
-import lesson04.Interface.Maximum;
-import lesson04.Interface.Reverse;
+import lesson02.Array;
+import lesson04.Interface.*;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class AppRunb04 {
 
@@ -53,6 +53,46 @@ public class AppRunb04 {
         maximum.maximum(listOfInt);
 
         // задача №5
+        Average average;
+        System.out.println();
+        List<Integer> list1 = Arrays.asList(12,23,22,1,36);
+         System.out.println("Список: " + list1);
+        average = (List<Integer> ll) -> {
+            Integer[] arr = (Integer[]) list1.toArray();
+            double averag = 0;
+            double summ = 0;
+            for (int i = 0; i < arr.length; i++) {
+                summ = summ + arr[i];
+            } averag = summ/ arr.length;
+                          return averag;
+        };
+        System.out.println("Среднее значение списка:" + average.average(list1));
+
+        // Задача №6
+        System.out.println();
+        List<String> listOfString = Arrays.asList("apple", "dog", "angle", "redux", "ale", "render", "application", "age");
+        System.out.println("Список слов: " + listOfString);
+        List<String> threeChars = new ArrayList<>();
+        HashSet h = new HashSet<>(listOfString);
+        Object[] wordsOnly = h.toArray();
+        String str;
+        for (int i = 0; i < wordsOnly.length; i++) {
+            str = (String) wordsOnly[i];
+            int count = 0;
+            for(int j = 0; j<str.length(); j++) {
+                count++;
+            }
+            if(count == 3){
+                threeChars.add(str);
+            }
+        }
+        System.out.println("Слова длинной в 3 буквы: " + threeChars);
+        System.out.println("Слова на а:");
+
+        String start = "a";
+        threeChars.stream()
+                .filter(x -> x.startsWith(start))
+                .forEach(System.out::println);
 
         }
 
