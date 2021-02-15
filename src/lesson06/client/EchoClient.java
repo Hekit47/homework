@@ -56,7 +56,7 @@ public class EchoClient extends JFrame {
         if (msgInputField.getText() != null && !msgInputField.getText().trim().isEmpty()) {
             try {
                 dos.writeUTF(msgInputField.getText());
-                chatArea.append(msgInputField.getText() + "\n");
+                //chatArea.append(msgInputField.getText() + "\n");
                 msgInputField.setText("");
             } catch (IOException ignored) {
             }
