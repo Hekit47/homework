@@ -10,7 +10,7 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
-
+    private boolean isAuthorized;
     private String name;
 
 
@@ -39,18 +39,17 @@ public class ClientHandler {
     }
 
 
-    private void authentication() throws IOException {
-        //сюда можно добавить счетчик неправильных попыток ввода пароля и логина
-        int count = 0; // добавил счетчик
-        while (count != 3) {
+    public void authentication() throws IOException {
+        while (true) {
             String str = dis.readUTF();
-            if (str.startsWith("/auth")) { // /auth
-                String[] arr = str.split("\\s");
+            if (str.startsWith("/auth")) { //  /auth login password
+                String [] arr = str.split("\\s");
                 String nick = myServer
                         .getAuthService()
                         .getNickByLoginAndPassword(arr[1], arr[2]);
-                if(nick != null){
-                    if(myServer.isNickBusy(nick)){
+                if (nick != null) {
+                    if (!myServer.isNickBusy(nick)) {
+                        isAuthorized = true;
                         sendMessage("/authok " + nick);
                         name = nick;
                         myServer.broadCastMessage("Hello " + name);
@@ -59,15 +58,14 @@ public class ClientHandler {
                     } else {
                         sendMessage("Nick is busy");
                     }
+                } else {
+                    sendMessage("Wrong login and password");
                 }
             } else {
-                sendMessage("Wrong login or password");
-                count++;
+                sendMessage("Your command will be need start with /auth");
             }
         }
     }
-
-
 
     public void readMessage() throws IOException {
         //ждем сообщение от клиента, пока не напишет. можно вставить таймер, чтобы отключить клиента, если он молчит
@@ -75,7 +73,6 @@ public class ClientHandler {
             String messageFromClient = dis.readUTF();
             System.out.println(name + " sent message " + messageFromClient); //вместо систем.аут может быть какая-то другая логика
             if(messageFromClient.equals("/end")){
-
                 return;
             }
             myServer.broadCastMessage(name + ": " + messageFromClient);
@@ -109,7 +106,9 @@ public class ClientHandler {
 //            socket.close();
 //        }catch (IOException ignored){
 //        }
-
     }
 
+    public String getName(){
+        return name;
+    }
 }

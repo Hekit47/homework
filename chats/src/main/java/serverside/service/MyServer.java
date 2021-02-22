@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 //сервисная часть сервера
 public class MyServer {
@@ -19,7 +20,7 @@ public class MyServer {
 
    public MyServer(){
 
-       try (ServerSocket server = ServerSocket(PORT)){
+       try (ServerSocket server = new ServerSocket(PORT)){
 
            authService = new BaseAuthService();
            authService.start();
@@ -56,6 +57,15 @@ public class MyServer {
    public synchronized void unsubscribe(ClientHandler client){
        clients.remove(client);
    }
+
+
+    public boolean isNickBusy(String nick) {
+        for (ClientHandler c:clients) {
+            if(c.getName().equals(nick)){
+                return true;
+            }
+        }return false;
+    }
 
 
 }

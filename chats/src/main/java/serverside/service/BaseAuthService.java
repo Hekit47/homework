@@ -13,13 +13,12 @@ public class BaseAuthService implements AuthService {
 
     public BaseAuthService(){
         entryList = new ArrayList<>();
-        entryList.add(new Entry("login1", "pass1", "nick1"));
+        entryList.add(new Entry("David", "123", "nick1"));
         entryList.add(new Entry("login2", "pass2", "nick2"));
         entryList.add(new Entry("login3", "pass3", "nick3"));
 
 
     }
-
 
     @Override
     public void start() {
