@@ -69,13 +69,31 @@ public class ClientHandler {
 
     public void readMessage() throws IOException {
         //ждем сообщение от клиента, пока не напишет. можно вставить таймер, чтобы отключить клиента, если он молчит
-        while(true){
+        while (true) {
             String messageFromClient = dis.readUTF();
-            System.out.println(name + " sent message " + messageFromClient); //вместо систем.аут может быть какая-то другая логика
-            if(messageFromClient.equals("/end")){
-                return;
+            System.out.println(name + " send message " + messageFromClient);//вместо систем.аут может быть какая-то другая логика
+            if (messageFromClient.trim().startsWith("/")) {
+
+                if (messageFromClient.startsWith("/w")) {
+                    //добавил try catch, т.к. при неверной комманде у пользователя закрывалась сессия
+                    try {
+                        String [] arr = messageFromClient.split(" ", 3);
+                        myServer.sendMessageToCertainClient(this, arr[1], name + ": " + arr[2]);
+                    }catch (ArrayIndexOutOfBoundsException ignored){
+                        sendMessage("Wrong command. Repeat please!");
+                    }
+                }
+
+                if (messageFromClient.trim().startsWith("/list")) {
+                    myServer.getOnlineUsersList(this);
+                }
+
+                if (messageFromClient.trim().startsWith("/end")) {
+                    return;
+                }
+            } else {
+                myServer.broadCastMessage(name + ": " + messageFromClient);
             }
-            myServer.broadCastMessage(name + ": " + messageFromClient);
         }
     }
 
