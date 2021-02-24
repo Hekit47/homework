@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.*;
 
 public class ClientHandler {
     private MyServer myServer;
@@ -11,7 +12,9 @@ public class ClientHandler {
     private DataInputStream dis;
     private DataOutputStream dos;
     private boolean isAuthorized;
+    private boolean isClientActive;
     private String name;
+    private long time;
 
 
 
@@ -32,6 +35,19 @@ public class ClientHandler {
                     closeConnection();
                 }
             }).start();
+
+            //добавим таймер по аутентификации. если пользователь не подключился через 2 минуты после открытия окна, то разрываем сессию
+            new Thread(() -> {
+                try {
+                    Thread.sleep(120000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (!isAuthorized) {
+                    closeConnection();
+                }
+            }
+            ).start();
 
         } catch (IOException e){
             throw new RuntimeException("Problem with ClientHandler");
@@ -68,34 +84,41 @@ public class ClientHandler {
     }
 
     public void readMessage() throws IOException {
-        //ждем сообщение от клиента, пока не напишет. можно вставить таймер, чтобы отключить клиента, если он молчит
-        while (true) {
+
+        while (!isClientActive) {
+            time = System.currentTimeMillis();
             String messageFromClient = dis.readUTF();
-            System.out.println(name + " send message " + messageFromClient);//вместо систем.аут может быть какая-то другая логика
-            if (messageFromClient.trim().startsWith("/")) {
+            if(System.currentTimeMillis()<= time + 10000){ //добавил проверку условия, что клиент пишет сообщения не реже, чем каждые 3 минуты
+                System.out.println(name + " send message " + messageFromClient);//вместо систем.аут может быть какая-то другая логика
+                if (messageFromClient.trim().startsWith("/")) {
 
-                if (messageFromClient.startsWith("/w")) {
-                    //добавил try catch, т.к. при неверной комманде у пользователя закрывалась сессия
-                    try {
-                        String [] arr = messageFromClient.split(" ", 3);
-                        myServer.sendMessageToCertainClient(this, arr[1], name + ": " + arr[2]);
-                    }catch (ArrayIndexOutOfBoundsException ignored){
-                        sendMessage("Wrong command. Repeat please!");
+                    if (messageFromClient.startsWith("/w")) {
+                        //добавил try catch, т.к. при неверной комманде у пользователя закрывалась сессия
+                        try {
+                            String [] arr = messageFromClient.split(" ", 3);
+                            myServer.sendMessageToCertainClient(this, arr[1], name + ": " + arr[2]);
+                        }catch (ArrayIndexOutOfBoundsException ignored){
+                            sendMessage("Wrong command. Repeat please!");
+                        }
                     }
-                }
 
-                if (messageFromClient.trim().startsWith("/list")) {
-                    myServer.getOnlineUsersList(this);
-                }
+                    if (messageFromClient.trim().startsWith("/list")) {
+                        myServer.getOnlineUsersList(this);
+                    }
 
-                if (messageFromClient.trim().startsWith("/end")) {
-                    return;
-                }
-            } else {
-                myServer.broadCastMessage(name + ": " + messageFromClient);
+                    if (messageFromClient.trim().startsWith("/end")) {
+                        return;
+                    }
+                } else {
+                    myServer.broadCastMessage(name + ": " + messageFromClient);
+                }} else {isClientActive = true;}
+
             }
+        sendMessage("Вы отключены, т.к. были неактивны.Перезайдите в чат!");
+        closeConnection();
         }
-    }
+
+
 
     public void sendMessage(String message) {
         try {
@@ -106,8 +129,8 @@ public class ClientHandler {
     }
 
     public void closeConnection() {
-        myServer.unsubscribe(this);
         myServer.broadCastMessage(name + " Leave chat");
+        myServer.unsubscribe(this);
         try {
             dis.close();
             dos.close();
@@ -129,4 +152,5 @@ public class ClientHandler {
     public String getName(){
         return name;
     }
+
 }
