@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.*;
 
 public class EchoClient extends JFrame {
 
@@ -138,6 +139,7 @@ public class EchoClient extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new EchoClient();
+            Map<String, Integer> map = new HashMap<>();
         });
     }
 }
