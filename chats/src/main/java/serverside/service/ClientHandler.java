@@ -88,7 +88,7 @@ public class ClientHandler {
         while (!isClientActive) {
             time = System.currentTimeMillis();
             String messageFromClient = dis.readUTF();
-            if(System.currentTimeMillis()<= time + 10000){ //добавил проверку условия, что клиент пишет сообщения не реже, чем каждые 3 минуты
+            if(System.currentTimeMillis()<= time + 180000){ //добавил проверку условия, что клиент пишет сообщения не реже, чем каждые 3 минуты
                 System.out.println(name + " send message " + messageFromClient);//вместо систем.аут может быть какая-то другая логика
                 if (messageFromClient.trim().startsWith("/")) {
 
